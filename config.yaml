@@ -1,0 +1,17 @@
+jira:
+  url: "https://tu-empresa.atlassian.net"
+  email: "tu-email@empresa.com"
+  # NOTA: El token NO va aquí por seguridad
+
+defaults:
+  priority: "Medium"
+  issue_type_epic: "Epic"
+  issue_type_story: "Story"
+
+# Mapeo de proyectos: Alias -> Key en Jira
+projects:
+  tienda: 
+    key: "ECOMM"
+    epic_name_field: "Epic Name" # Opcional, si ya sabemos el nombre
+  rrhh:
+    key: "HR"
