@@ -5,5 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "re",
+    "atlassian-python-api",
+    "pyyaml",
+    "python-dotenv",
+    "typer",
+    "rich",
+]
+
+[project.scripts]
+jira-tool = "src.main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]

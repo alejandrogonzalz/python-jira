@@ -1,7 +1,9 @@
-# utils.py
 import re
 
 class JiraFormatter:
+    """
+    A utility class for converting Markdown text to Jira's markup language.
+    """
     @staticmethod
     def markdown_to_jira(text: str) -> str:
         if not text:
@@ -21,15 +23,14 @@ class JiraFormatter:
 
         # 4. Listas (Markdown usa - o *, Jira prefiere * para bullets)
         # Solo reemplazamos al inicio de la línea
-        text = re.sub(r'^\s*-\s+', r'* ', text, flags=re.MULTILINE)
+        text = re.sub(r'^(\s*)-\s+', r'\1* ', text, flags=re.MULTILINE)
 
-        # 5. Bloques de Código (```len()``` -> {{len()}})
-        # Bloque inline
+        # 5. Bloques de Código
+        # Multiline code blocks with language (```python\ncode\n``` -> {code:python}\ncode\n{code})
+        text = re.sub(r'```(\w+)\n(.*?)\n```', r'{code:\1}\n\2\n{code}', text, flags=re.DOTALL)
+        # Multiline code blocks without language (```\ncode\n``` -> {code}\ncode\n{code})
+        text = re.sub(r'```\n(.*?)\n```', r'{code}\n\1\n{code}', text, flags=re.DOTALL)
+        # Inline code (```len()``` -> {{len()}})
         text = re.sub(r'`([^`]+)`', r'{{\1}}', text)
-        
-        # Bloque multi-línea (simplificado)
-        # Markdown ```python -> Jira {code:python}
-        text = re.sub(r'```(\w+)', r'{code:\1}', text)
-        text = re.sub(r'```', r'{code}', text)
 
         return text

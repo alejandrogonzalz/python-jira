@@ -1,9 +1,12 @@
 import os
 import yaml
 from dotenv import load_dotenv
-from typing import Dict, Any
 
 class ConfigManager:
+    """
+    Manages configuration for the Jira integration.
+    It loads configuration from a YAML file and environment variables.
+    """
     def __init__(self, config_path: str = "config.yaml"):
         # 1. Cargar variables de entorno (el Token)
         load_dotenv()

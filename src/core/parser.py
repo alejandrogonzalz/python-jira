@@ -5,6 +5,9 @@ from typing import List, Optional
 # --- 1. Modelos de Datos (Independientes de JIRA) ---
 @dataclass
 class UserStory:
+    """
+    Represents a User Story with its title, description, and acceptance criteria.
+    """
     title: str
     description: str = ""
     acceptance_criteria: List[str] = field(default_factory=list)
@@ -18,6 +21,9 @@ class UserStory:
 
 @dataclass
 class Epic:
+    """
+    Represents an Epic with its title, description, and a list of associated User Stories.
+    """
     title: str
     description: str = ""
     stories: List[UserStory] = field(default_factory=list)
@@ -27,6 +33,9 @@ class Epic:
 
 # --- 2. La Lógica del Parser ---
 class MarkdownParser:
+    """
+    Parses a Markdown string to extract a list of Epics and their User Stories.
+    """
     def __init__(self):
         # Regex para detectar encabezados # y ##
         self.epic_pattern = re.compile(r'^#\s+(.+)$')

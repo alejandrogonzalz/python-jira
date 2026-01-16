@@ -4,7 +4,7 @@ Herramienta CLI robusta escrita en Python para automatizar la creación de **Ép
 
 Diseñada para equipos que prefieren documentar requerimientos en texto plano (`.md`) y sincronizarlos con JIRA sin el tedio de copiar y pegar manualmente.
 
-## ✨ Características
+## Características
 
 - **Markdown Parsing:** Convierte `# Títulos` en Épicas y `## Subtítulos` en Historias.
 - **Formato Rico:** Traduce automáticamente negritas, listas y links de Markdown a Jira Wiki Markup.
@@ -17,4 +17,3 @@ Diseñada para equipos que prefieren documentar requerimientos en texto plano (`
 - Python 3.9+
 - [uv](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer) (Gestor de dependencias recomendado)
 - Una cuenta de JIRA Cloud y un [API Token](https://id.atlassian.com/manage-profile/security/api-tokens).
-

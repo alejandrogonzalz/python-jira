@@ -1,11 +1,15 @@
-import os
 from atlassian import Jira
 from requests.exceptions import HTTPError
 from typing import Optional
 
-from parser import Epic, UserStory 
+from .parser import Epic, UserStory
+from .utils import JiraFormatter
 
 class JiraAdapter:
+    """
+    A singleton adapter class for interacting with the Jira API.
+    This class provides methods for creating Epics and User Stories in Jira.
+    """
     _instance = None
     _jira_client = None
     
@@ -41,7 +45,7 @@ class JiraAdapter:
         fields = {
             "project": {"key": project_key},
             "summary": epic.title,
-            "description": epic.description,
+            "description": JiraFormatter.markdown_to_jira(epic.description),
             "issuetype": {"name": "Epic"},
             # Campo obligatorio para Epics en muchos Jiras
             "customfield_10011": epic.title  # "Epic Name" (el ID del campo varía según la instancia)
@@ -63,11 +67,11 @@ class JiraAdapter:
         """Crea una Historia y la vincula a la Épica padre"""
         
         # Convertimos la lista de criterios en texto formateado para JIRA
-        desc_completa = story.description
+        desc_completa = JiraFormatter.markdown_to_jira(story.description)
         if story.acceptance_criteria:
             desc_completa += "\n\n*Criterios de Aceptación:*\n"
             for crit in story.acceptance_criteria:
-                desc_completa += f"* {crit}\n"
+                desc_completa += f"* {JiraFormatter.markdown_to_jira(crit)}\n"
 
         fields = {
             "project": {"key": project_key},

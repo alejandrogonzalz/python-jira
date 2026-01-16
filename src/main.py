@@ -1,10 +1,9 @@
 import typer
 from rich.console import Console
 from rich.panel import Panel
-from typing import Optional
-from config_manager import ConfigManager
-from adapter import JiraAdapter
-from parser import MarkdownParser
+from src import ConfigManager
+from src import JiraAdapter
+from src import MarkdownParser
 
 # Inicializamos la app y la consola para prints bonitos
 app = typer.Typer()
