@@ -1,3 +1,3 @@
 from .adapter import JiraAdapter
-from .parser import MarkdownParser, Epic, UserStory
+from .parser import Epic, MarkdownParser, UserStory
 from .utils import JiraFormatter

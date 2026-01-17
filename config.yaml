@@ -1,17 +1,15 @@
 jira:
-  url: "https://tu-empresa.atlassian.net"
-  email: "tu-email@empresa.com"
-  # NOTA: El token NO va aquí por seguridad
+  url: "https://meridian-t9.atlassian.net"
+  email: "alex.aga816@gmail.com"
+  # ¡NO pongas el token aquí!
 
 defaults:
   priority: "Medium"
   issue_type_epic: "Epic"
   issue_type_story: "Story"
 
-# Mapeo de proyectos: Alias -> Key en Jira
 projects:
-  tienda: 
-    key: "ECOMM"
-    epic_name_field: "Epic Name" # Opcional, si ya sabemos el nombre
-  rrhh:
-    key: "HR"
+  # Alias 't9' para usar en consola
+  MERIDIAN:
+    key: "MT"  # <--- La CLAVE real de tu proyecto en Jira (ej. PED, T9, CUST)
+    epic_name_field: "Epic Name" # Déjalo así por ahora

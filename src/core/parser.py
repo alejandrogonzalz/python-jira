@@ -2,12 +2,14 @@ import re
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+
 # --- 1. Modelos de Datos (Independientes de JIRA) ---
 @dataclass
 class UserStory:
     """
     Represents a User Story with its title, description, and acceptance criteria.
     """
+
     title: str
     description: str = ""
     acceptance_criteria: List[str] = field(default_factory=list)
@@ -19,11 +21,13 @@ class UserStory:
         else:
             self.description += line + "\n"
 
+
 @dataclass
 class Epic:
     """
     Represents an Epic with its title, description, and a list of associated User Stories.
     """
+
     title: str
     description: str = ""
     stories: List[UserStory] = field(default_factory=list)
@@ -31,27 +35,30 @@ class Epic:
     def add_line(self, line: str):
         self.description += line + "\n"
 
+
 # --- 2. La Lógica del Parser ---
 class MarkdownParser:
     """
     Parses a Markdown string to extract a list of Epics and their User Stories.
     """
+
     def __init__(self):
         # Regex para detectar encabezados # y ##
-        self.epic_pattern = re.compile(r'^#\s+(.+)$')
-        self.story_pattern = re.compile(r'^##\s+(.+)$')
+        self.epic_pattern = re.compile(r"^#\s+(.+)$")
+        self.story_pattern = re.compile(r"^##\s+(.+)$")
 
     def parse(self, content: str) -> List[Epic]:
         epics = []
         current_epic: Optional[Epic] = None
         current_story: Optional[UserStory] = None
-        
+
         # Leemos línea por línea
         lines = content.splitlines()
-        
+
         for line in lines:
             line = line.strip()
-            if not line: continue  # Saltar líneas vacías
+            if not line:
+                continue  # Saltar líneas vacías
 
             # 1. Detectar Nueva Épica
             epic_match = self.epic_pattern.match(line)
@@ -60,15 +67,17 @@ class MarkdownParser:
                 # Creamos nueva épica
                 current_epic = Epic(title=epic_match.group(1))
                 epics.append(current_epic)
-                current_story = None # Reseteamos la historia
+                current_story = None  # Reseteamos la historia
                 continue
 
             # 2. Detectar Nueva Historia
             story_match = self.story_pattern.match(line)
             if story_match:
                 if not current_epic:
-                    raise ValueError(f"Error: Encontré una Historia '{line}' sin una Épica padre.")
-                
+                    raise ValueError(
+                        f"Error: Encontré una Historia '{line}' sin una Épica padre."
+                    )
+
                 current_story = UserStory(title=story_match.group(1))
                 current_epic.stories.append(current_story)
                 continue
@@ -80,5 +89,5 @@ class MarkdownParser:
             elif current_epic:
                 # Si no hay historia, pero sí épica, es descripción de la épica
                 current_epic.add_line(line)
-        
+
         return epics

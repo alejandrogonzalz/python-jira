@@ -1,4 +1,5 @@
 import pytest
+
 from src.core.parser import MarkdownParser
 
 
@@ -12,6 +13,7 @@ def parser():
 
 # --- TESTS ---
 
+
 def test_parse_single_epic_no_stories(parser):
     markdown_content = """
 # My First Epic
@@ -23,7 +25,10 @@ It spans multiple lines.
     assert len(epics) == 1
     assert epics[0].title == "My First Epic"
     # Verificamos que respete los saltos de línea en la descripción
-    assert epics[0].description.strip() == "This is the description for the first epic.\nIt spans multiple lines."
+    assert (
+        epics[0].description.strip()
+        == "This is the description for the first epic.\nIt spans multiple lines."
+    )
     assert len(epics[0].stories) == 0
 
 
@@ -67,7 +72,10 @@ Some more description.
 
     assert story.title == "Story with AC"
     # Verificamos que el parser separó la lista (Criterios) del texto plano (Descripción)
-    assert story.description.strip() == "This is a story description.\nSome more description."
+    assert (
+        story.description.strip()
+        == "This is a story description.\nSome more description."
+    )
     assert story.acceptance_criteria == ["Criterion 1", "Criterion 2"]
 
 
@@ -123,15 +131,20 @@ This story has no parent epic.
 """
     # pytest.raises con match reemplaza a assertRaisesRegex
     # El match busca texto parcial dentro del mensaje de error
-    with pytest.raises(ValueError, match="Encontré una Historia .* sin una Épica padre"):
+    with pytest.raises(
+        ValueError, match="Encontré una Historia .* sin una Épica padre"
+    ):
         parser.parse(markdown_content)
 
 
 # Agrupamos casos vacíos o solo espacios en un solo test parametrizado
-@pytest.mark.parametrize("content", [
-    "",  # Vacío total
-    "   \n \t \n"  # Solo espacios en blanco
-])
+@pytest.mark.parametrize(
+    "content",
+    [
+        "",  # Vacío total
+        "   \n \t \n",  # Solo espacios en blanco
+    ],
+)
 def test_parse_empty_or_whitespace(parser, content):
     epics = parser.parse(content)
     assert len(epics) == 0
