@@ -34,7 +34,7 @@ class JiraFormatter:
         )
         # Multiline code blocks without language (```\ncode\n``` -> {code}\ncode\n{code})
         text = re.sub(r"```\n(.*?)\n```", r"{code}\n\1\n{code}", text, flags=re.DOTALL)
-        # Inline code (```len()``` -> {{len()}})
+        # 6. Inline code (`texto` -> {{texto}})
         text = re.sub(r"`([^`]+)`", r"{{\1}}", text)
 
         return text

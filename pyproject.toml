@@ -14,6 +14,7 @@ dependencies = [
 
 [project.scripts]
 jira-tool = "main:app"
+jira-preview = "preview:app"
 
 [tool.uv]
 package = true

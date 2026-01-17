@@ -22,6 +22,12 @@ def create(
     dry_run: bool = typer.Option(
         False, "--dry-run", help="Simula la ejecución sin crear tickets reales"
     ),
+    update: bool = typer.Option(
+        False,
+        "--update",
+        "-u",
+        help="Fuerza la actualización de descripción si el ticket ya existe",
+    ),
 ):
     """
     Lee un archivo Markdown y crea Épicas e Historias en JIRA.
@@ -41,6 +47,7 @@ def create(
             email=cfg.jira_email,
             token=cfg.jira_token,
             dry_run=dry_run,
+            update=update,
         )
 
         # 3. Validar Proyecto

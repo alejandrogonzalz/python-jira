@@ -3,91 +3,92 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-# --- 1. Modelos de Datos (Independientes de JIRA) ---
+# --- Modelos ---
 @dataclass
 class UserStory:
-    """
-    Represents a User Story with its title, description, and acceptance criteria.
-    """
-
     title: str
     description: str = ""
     acceptance_criteria: List[str] = field(default_factory=list)
 
-    def add_line(self, line: str):
-        # Detecta si es un criterio (lista con guion) o texto normal
-        if line.strip().startswith("- "):
-            self.acceptance_criteria.append(line.strip()[2:])
-        else:
-            self.description += line + "\n"
+    def set_content(self, raw_content: str):
+        """Separa descripción de criterios"""
+        lines = raw_content.strip().splitlines()
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            if stripped.startswith("- ") or stripped.startswith("* "):
+                self.acceptance_criteria.append(stripped[2:])
+            else:
+                self.description += line + "\n"
+        self.description = self.description.strip()
 
 
 @dataclass
 class Epic:
-    """
-    Represents an Epic with its title, description, and a list of associated User Stories.
-    """
-
     title: str
     description: str = ""
     stories: List[UserStory] = field(default_factory=list)
 
-    def add_line(self, line: str):
-        self.description += line + "\n"
 
-
-# --- 2. La Lógica del Parser ---
+# --- Parser con Soporte de Secciones ---
 class MarkdownParser:
     """
-    Parses a Markdown string to extract a list of Epics and their User Stories.
+    Parser avanzado que soporta documentación rica en la Épica.
+    Busca un separador '# Historias' para saber cuándo terminan los docs y empiezan los tickets.
     """
 
-    def __init__(self):
-        # Regex para detectar encabezados # y ##
-        self.epic_pattern = re.compile(r"^#\s+(.+)$")
-        self.story_pattern = re.compile(r"^##\s+(.+)$")
-
     def parse(self, content: str) -> List[Epic]:
-        epics = []
-        current_epic: Optional[Epic] = None
-        current_story: Optional[UserStory] = None
+        # 1. Extraer el Título Principal (# Título)
+        epic_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+        if not epic_match:
+            return []
 
-        # Leemos línea por línea
-        lines = content.splitlines()
+        epic_title = epic_match.group(1).strip()
+        full_content = content
 
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue  # Saltar líneas vacías
+        # 2. Buscar el SEPARADOR de Historias
+        # Buscamos una línea que sea exactamente "# Historias" o "# Stories" (case insensitive)
+        separator_regex = r"(?im)^#\s+(?:Historias|Stories|User Stories)\s*$"
+        separator_match = re.search(separator_regex, full_content)
 
-            # 1. Detectar Nueva Épica
-            epic_match = self.epic_pattern.match(line)
-            if epic_match:
-                # Si había una historia abierta, ya se guardó en la épica anterior
-                # Creamos nueva épica
-                current_epic = Epic(title=epic_match.group(1))
-                epics.append(current_epic)
-                current_story = None  # Reseteamos la historia
-                continue
+        epic_desc_text = ""
+        stories_block = ""
 
-            # 2. Detectar Nueva Historia
-            story_match = self.story_pattern.match(line)
-            if story_match:
-                if not current_epic:
-                    raise ValueError(
-                        f"Error: Encontré una Historia '{line}' sin una Épica padre."
-                    )
+        if separator_match:
+            # CASO A: Hay separador.
+            # La descripción es todo desde el inicio hasta antes del separador
+            # (Quitamos la primera línea del título de la épica para no duplicarlo)
+            split_index = separator_match.start()
+            epic_desc_raw = full_content[:split_index]
 
-                current_story = UserStory(title=story_match.group(1))
-                current_epic.stories.append(current_story)
-                continue
+            # Limpiamos el título principal de la descripción
+            epic_desc_text = epic_desc_raw.replace(epic_match.group(0), "", 1).strip()
 
-            # 3. Procesar Contenido (Descripción o Criterios)
-            if current_story:
-                # Si estamos dentro de una historia, el texto va para ella
-                current_story.add_line(line)
-            elif current_epic:
-                # Si no hay historia, pero sí épica, es descripción de la épica
-                current_epic.add_line(line)
+            # El bloque de historias es todo lo que sigue al separador
+            stories_block = full_content[separator_match.end() :]
 
-        return epics
+        else:
+            # CASO B: No hay separador (Todo es descripción, 0 historias)
+            # O el usuario olvidó poner "# Historias". Asumimos que todo es Épica.
+            epic_desc_text = full_content.replace(epic_match.group(0), "", 1).strip()
+
+        # Creamos la Épica
+        epic = Epic(title=epic_title, description=epic_desc_text)
+
+        # 3. Procesar las Historias (si existen) del bloque de historias
+        if stories_block:
+            # Aquí sí, cada "## " es una historia nueva
+            sections = re.split(r"(?m)^##\s+(.+)$", stories_block)
+
+            # sections[0] suele ser vacío o texto introductorio bajo "# Historias"
+            for i in range(1, len(sections), 2):
+                story_title = sections[i].strip()
+                story_content = sections[i + 1] if i + 1 < len(sections) else ""
+
+                story = UserStory(title=story_title)
+                story.set_content(story_content)
+                epic.stories.append(story)
+
+        return [epic]
